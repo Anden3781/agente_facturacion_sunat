@@ -215,3 +215,4 @@ MIT - Proyecto educativo para hackathon.
 ## 🙏 Agradecimientos
 
 Desarrollado durante IActivate 2025 Hackathon.
+
