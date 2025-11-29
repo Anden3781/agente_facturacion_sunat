@@ -282,8 +282,43 @@ def render_natural_language_panel() -> None:
             st.session_state.nl_input = ""
             st.experimental_rerun()
 
-    if st.button("Generar borrador (IA pendiente)", type="primary"):
-        st.info("La extracción automática con IA todavía no está implementada en este MVP.")
+
+    if st.button("Generar borrador con IA", type="primary"):
+        if not st.session_state.nl_input.strip():
+            st.warning("Por favor, escribe una descripción primero.")
+        else:
+            with st.spinner("Procesando con IA..."):
+                try:
+                    import requests
+                    
+                    # Call backend API
+                    response = requests.post(
+                        "http://localhost:8000/generate-invoice",
+                        json={
+                            "text": st.session_state.nl_input,
+                            "igv_rate": st.session_state.invoice["igv_rate"]
+                        },
+                        timeout=10
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        
+                        # Update invoice with parsed data
+                        st.session_state.invoice["customer"]["name"] = data.get("client", "Cliente General")
+                        st.session_state.invoice["customer"]["tax_id"] = data.get("ruc", "00000000000")
+                        st.session_state.invoice["items"] = data.get("items", [])
+                        
+                        st.success("✅ Factura generada exitosamente!")
+                        st.experimental_rerun()
+                    else:
+                        st.error(f"Error del servidor: {response.status_code}")
+                        
+                except requests.exceptions.ConnectionError:
+                    st.error("❌ No se pudo conectar al backend. Asegúrate de que esté corriendo en http://localhost:8000")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+
 
 
 # ----------------- UI: tabla de ítems -----------------
