@@ -3,3 +3,7 @@ uvicorn
 pydantic
 python-multipart
 openai
+python-telegram-bot
+reportlab
+python-dotenv
+

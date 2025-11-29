@@ -30,10 +30,16 @@ def parse_with_regex(text: str) -> dict:
         "items": []
     }
     
-    # 1. Extract RUC (11 digits)
-    ruc_match = re.search(r'\b(10|20)\d{9}\b', text)
+    # 1. Extract RUC (11 digits, optionally preceded by "RUC" keyword)
+    # Pattern 1: "RUC 12345678901" or "RUC: 12345678901" or just "12345678901"
+    ruc_match = re.search(r'(?:ruc[:\s]+)?(\d{11})\b', text, re.IGNORECASE)
     if ruc_match:
-        data["ruc"] = ruc_match.group(0)
+        data["ruc"] = ruc_match.group(1)
+    else:
+        # Pattern 2: Any 11-digit number starting with 10 or 20 (standard RUC format)
+        ruc_match = re.search(r'\b(10|20)\d{9}\b', text)
+        if ruc_match:
+            data["ruc"] = ruc_match.group(0)
         
     # 2. Extract Client (Heuristic: "a [Client Name]" or "para [Client Name]")
     client_match = re.search(r'(?:a|para)\s+([A-Z][a-zA-Z0-9\s]+?)(?=\s+(?:con|por|de|ruc|$))', text, re.IGNORECASE)
