@@ -298,7 +298,7 @@ def render_natural_language_panel() -> None:
                             "text": st.session_state.nl_input,
                             "igv_rate": st.session_state.invoice["igv_rate"]
                         },
-                        timeout=10
+                        timeout=30  # Increased timeout for AI processing
                     )
                     
                     if response.status_code == 200:
