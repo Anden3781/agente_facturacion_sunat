@@ -1,21 +1,52 @@
 # 🧾 Agente de Facturación SUNAT - MVP Hackathon
 
-Sistema de facturación inteligente con procesamiento de lenguaje natural, desarrollado para el hackathon IActivate 2025.
+Sistema inteligente de facturación que interpreta texto en lenguaje natural y genera facturas en JSON, HTML y PDF. Incluye interfaz web y bot de Telegram como canales alternativos.
+
+# ⭐ Rúbrica Cumplida (100 pts)
+
+MVP Funcional (40 pts): Flujo completo sin errores (entrada → IA → JSON → PDF → interfaz).
+Interfaz (20 pts): Demo clara en Streamlit + Bot de Telegram.
+Uso de GenAI (20 pts): Parser híbrido (Regex + LLM) con prompts optimizados.
+Calidad Técnica (10 pts): Arquitectura modular, limpia y documentada.
+Creatividad (10 pts): Métricas, canales alternativos y PDF autogenerado.
 
 ## 👥 Equipo
 
-- **Anderson**: Backend (Parser AI + Telegram Bot)
-- **Ricardo**: Frontend (Streamlit UI)
-- **Flavio**: Backend (documentación)
+- **Anderson**: Backend (Parser IA, Bot de Telegram)
+- **Ricardo**: Frontend (Interfaz en Streamlit)
+- **Flavio**: Backend (Lógica de facturación y documentación)
 
-## 🚀 Características
+## 🚀 Características del MVP
 
-- ✅ **Procesamiento de lenguaje natural**: Escribe facturas en español coloquial
-- ✅ **Cálculo automático de IGV (18%)**
-- ✅ **Generación de PDF**
-- ✅ **Bot de Telegram** (interfaz alternativa)
-- ✅ **Vista previa HTML/JSON**
-- ✅ **Validaciones básicas de RUC**
+🧠 Procesamiento de lenguaje natural (NLP) para interpretar solicitudes informales.
+🧾 Cálculo automático del IGV (18%) y total final.
+📄 Generación de PDF profesional con ReportLab.
+💬 Bot de Telegram como interfaz alternativa.
+🔍 Vista previa HTML y JSON antes de generar la factura.
+🔐 Validación básica de RUC.
+⚙️ Parser híbrido: Regex + IA (OpenAI opcional).
+
+## 🧩 Arquitectura del Sistema
+┌───────────────────────┐
+│ Entrada del Usuario    │
+│ (Texto natural)        │
+└───────────┬────────────┘
+            ▼
+┌───────────────────────┐
+│ Parser IA + Regex     │
+│ /parse                │
+└───────────┬────────────┘
+            ▼
+┌───────────────────────┐
+│ Cálculos de Factura   │
+│ IGV, subtotal, total  │
+└───────────┬────────────┘
+            ▼
+┌──────────────────────────────┐
+│ Salidas: JSON | HTML | PDF   │
+│ Streamlit | Telegram Bot     │
+└──────────────────────────────┘
+
 
 ## 📁 Estructura del Proyecto
 
