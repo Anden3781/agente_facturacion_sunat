@@ -27,25 +27,19 @@ Creatividad (10 pts): Métricas, canales alternativos y PDF autogenerado.
 ⚙️ Parser híbrido: Regex + IA (OpenAI opcional).
 
 ## 🧩 Arquitectura del Sistema
-┌───────────────────────┐
-│ Entrada del Usuario    │
-│ (Texto natural)        │
-└───────────┬────────────┘
-            ▼
-┌───────────────────────┐
-│ Parser IA + Regex     │
-│ /parse                │
-└───────────┬────────────┘
-            ▼
-┌───────────────────────┐
-│ Cálculos de Factura   │
-│ IGV, subtotal, total  │
-└───────────┬────────────┘
-            ▼
-┌──────────────────────────────┐
-│ Salidas: JSON | HTML | PDF   │
-│ Streamlit | Telegram Bot     │
-└──────────────────────────────┘
+
+Entrada del Usuario
+(Texto natural)
+        /    
+Parser IA + Regex
+/parse
+            /
+Cálculos de Factura
+IGV, subtotal, total
+            /
+Salidas: JSON | HTML | PDF
+Streamlit | Telegram Bot 
+
 
 
 ## 📁 Estructura del Proyecto
