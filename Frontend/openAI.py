@@ -307,10 +307,12 @@ def render_natural_language_panel() -> None:
                         # Update invoice with parsed data
                         st.session_state.invoice["customer"]["name"] = data.get("client", "Cliente General")
                         st.session_state.invoice["customer"]["tax_id"] = data.get("ruc", "00000000000")
+                        st.session_state.invoice["customer"]["address"] = data.get("address", "")
                         st.session_state.invoice["items"] = data.get("items", [])
                         
+                        
                         st.success("✅ Factura generada exitosamente!")
-                        st.experimental_rerun()
+                        st.rerun()
                     else:
                         st.error(f"Error del servidor: {response.status_code}")
                         
