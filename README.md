@@ -41,7 +41,6 @@ Salidas: JSON | HTML | PDF
 Streamlit | Telegram Bot 
 
 
-
 ## 📁 Estructura del Proyecto
 
 ```
@@ -53,7 +52,7 @@ IActivate2025/
 │   ├── pdf_service.py       # PDF generation
 │   ├── telegram_bot.py      # Telegram bot
 │   ├── requirements.txt
-│   └── .env                 # TELEGRAM_TOKEN
+│            
 ├── Frontend/
 │   ├── openAI.py            # Streamlit app (Ricardo)
 │   └── requirements.txt
