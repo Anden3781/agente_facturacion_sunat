@@ -5,6 +5,7 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 from parser_service import parse_input
 from pdf_service import generate_invoice_pdf
+from invoice_logic import calculate_totals
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,7 +24,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")  # User will set this
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Starts the conversation."""
     await update.message.reply_text(
-        "¡Hola! Soy tu Agente de Facturación. 🤖\n\n"
+        "¡Hola! Soy tu Agente de Facturación. 🤖\n"
         "Dime qué quieres facturar (ej: 'Factura a ACME RUC 20123456789 por 2 laptops a 1500')."
     )
     return WAITING_INPUT
@@ -35,16 +36,28 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     
     # 1. Parse Input
     parsed_data = parse_input(text)
+    
+    # Calculate totals
+    totals = calculate_totals(parsed_data['items'])
+    parsed_data.update(totals) # Add subtotal, igv_amount, total to parsed_data
+    
     user_data['invoice_data'] = parsed_data # Save to context
     
     # 2. Format Preview
-    items_str = "\n".join([f"- {i['quantity']} x {i['description']} (S/ {i['unit_price']})" for i in parsed_data['items']])
+    currency_symbol = "$" if parsed_data.get('currency') == 'USD' else "S/"
+    items_str = "\n".join([f"- {i['quantity']} x {i['description']} ({currency_symbol} {i['unit_price']})" for i in parsed_data['items']])
+    
     preview = (
         f"🧾 **Vista Previa**\n\n"
         f"👤 **Cliente:** {parsed_data['client']}\n"
         f"🆔 **RUC:** {parsed_data['ruc']}\n"
+        f"📍 **Dirección:** {parsed_data['address']}\n"
+        f"📧 **Correo:** {parsed_data['email']}\n\n"
         f"📦 **Ítems:**\n{items_str}\n\n"
-        f"¿Está correcto? Responde 'Sí' para generar el PDF o escribe los cambios (ej: 'Cambia la cantidad de laptops a 3')."
+        f"💰 **Subtotal:** {currency_symbol} {parsed_data['subtotal']}\n"
+        f"💵 **IGV (18%):** {currency_symbol} {parsed_data['igv_amount']}\n"
+        f"💳 **TOTAL:** {currency_symbol} {parsed_data['total']}\n\n"
+        f"¿Está correcto? Responde 'Sí' para generar el PDF o escribe los cambios."
     )
     
     await update.message.reply_text(preview, parse_mode='Markdown')

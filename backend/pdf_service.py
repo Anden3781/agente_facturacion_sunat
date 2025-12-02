@@ -87,14 +87,14 @@ def generate_invoice_pdf(data: dict, filename: str = "invoice.pdf") -> str:
     
     c.setFont("Helvetica-Bold", 10)
     c.drawString(350, y, "Op. Gravada:")
-    c.drawRightString(500, y, f"{currency_symbol} {total_neto:,.2f}")
+    c.drawRightString(550, y, f"{currency_symbol} {total_neto:,.2f}")
     y -= 15
     c.drawString(350, y, f"IGV ({int(igv_rate*100)}%):")
-    c.drawRightString(500, y, f"{currency_symbol} {igv:,.2f}")
+    c.drawRightString(550, y, f"{currency_symbol} {igv:,.2f}")
     y -= 15
     c.setFont("Helvetica-Bold", 12)
     c.drawString(350, y, "TOTAL A PAGAR:")
-    c.drawRightString(500, y, f"{currency_symbol} {total:,.2f}")
+    c.drawRightString(550, y, f"{currency_symbol} {total:,.2f}")
 
     # --- Footer / Notes ---
     y -= 40
