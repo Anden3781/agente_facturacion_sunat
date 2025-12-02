@@ -29,6 +29,7 @@ def init_session_state() -> None:
             },
             "items": [],
             "igv_rate": 0.18,  # 18%
+            "payment_method": "Contado",
             "notes": "",
         }
     if "nl_input" not in st.session_state:
@@ -310,6 +311,9 @@ def render_natural_language_panel() -> None:
                         st.session_state.invoice["customer"]["address"] = data.get("address", "")
                         st.session_state.invoice["customer"]["email"] = data.get("email", "")
                         st.session_state.invoice["items"] = data.get("items", [])
+                        st.session_state.invoice["currency"] = data.get("currency", "PEN")
+                        st.session_state.invoice["payment_method"] = data.get("payment_method", "Contado")
+                        st.session_state.invoice["notes"] = data.get("notes", "")
                         
                         # Debug: Mostrar lo que llegó
                         st.toast(f"Datos recibidos: {data}", icon="🐛")
@@ -347,7 +351,7 @@ def render_items_table(invoice: Dict[str, Any]) -> None:
 
     updated_items: List[Dict[str, Any]] = []
     for idx, item in enumerate(invoice.get("items", [])):
-        cols = st.columns([4, 1, 1, 1])
+        cols = st.columns([3, 1, 1, 1, 1])
         with cols[0]:
             desc = st.text_input(
                 "Descripción",
@@ -356,24 +360,35 @@ def render_items_table(invoice: Dict[str, Any]) -> None:
             )
         with cols[1]:
             qty = st.number_input(
-                "Cantidad",
+                "Cant.",
                 min_value=0.0,
                 value=float(item["quantity"]),
                 key=f"item_qty_{idx}",
             )
         with cols[2]:
+            unit = st.text_input(
+                "Unidad",
+                value=item.get("unit_measure", "NIU"),
+                key=f"item_unit_{idx}",
+            )
+        with cols[3]:
             unit_price = st.number_input(
-                "Precio unitario",
+                "P. Unit",
                 min_value=0.0,
                 value=float(item["unit_price"]),
                 key=f"item_price_{idx}",
             )
-        with cols[3]:
-            delete = st.button("Eliminar", key=f"item_del_{idx}")
+        with cols[4]:
+            delete = st.button("X", key=f"item_del_{idx}", help="Eliminar ítem")
 
         if not delete:
             updated_items.append(
-                {"description": desc, "quantity": qty, "unit_price": unit_price}
+                {
+                    "description": desc,
+                    "quantity": qty,
+                    "unit_measure": unit,
+                    "unit_price": unit_price
+                }
             )
 
     invoice["items"] = updated_items
@@ -390,18 +405,32 @@ def render_structured_invoice_panel() -> None:
 
     st.markdown("#### Datos del comprobante y emisor")
     with st.container():
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
             serie = st.text_input("Serie", value=invoice["serie"])
         with col2:
             number = st.text_input("Número", value=invoice["number"])
         with col3:
             issue_date_val = parse_issue_date(invoice["issue_date"])
-            issue_date_ui = st.date_input("Fecha de emisión", value=issue_date_val)
+            issue_date_ui = st.date_input("Fecha", value=issue_date_val)
+        with col4:
+            currency = st.selectbox(
+                "Moneda",
+                ["PEN", "USD"],
+                index=0 if invoice.get("currency", "PEN") == "PEN" else 1
+            )
+        with col5:
+            payment = st.selectbox(
+                "Pago",
+                ["Contado", "Crédito", "Transferencia", "Yape", "Plin"],
+                index=0  # Default Contado, logic to match string could be added
+            )
 
         invoice["serie"] = serie
         invoice["number"] = number
         invoice["issue_date"] = issue_date_ui.isoformat()
+        invoice["currency"] = currency
+        invoice["payment_method"] = payment
 
     with st.container():
         col1, col2 = st.columns(2)

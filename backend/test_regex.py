@@ -1,50 +1,74 @@
-import re
+import sys
+import os
 
-text = "genera una factura con ruc 20202020202 para anderson de 2 routers cisco de 5 mil dolares cada uno, con direccion en arica 1234 y correo ejemplo@hotmail.com"
+# Add the current directory to sys.path to ensure we can import parser_service
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-print(f"Texto a analizar: {text}\n")
+from parser_service import parse_with_regex, parse_input
 
-# 1. Test Address Regex
-print("--- Test Dirección ---")
-# Regex actual
-addr_pattern = r'(?:direccion|dirección)(?:\s+fiscal)?\s+en\s+([A-Za-z0-9\s,.-]+?)(?=\s+y\s+correo|\s*,|$)'
-match = re.search(addr_pattern, text, re.IGNORECASE)
-if match:
-    print(f"✅ Dirección encontrada: '{match.group(1).strip()}'")
-else:
-    print("❌ Dirección NO encontrada con el patrón actual")
+def run_test(name, text, expected_checks):
+    print(f"\n--- Test: {name} ---")
+    print(f"Input: {text}")
     
-    # Intento de patrón más flexible
-    flexible_pattern = r'(?:direccion|dirección)(?:.*?)en\s+([A-Za-z0-9\s,.-]+?)(?=\s+y\s+correo|\s+correo|$)'
-    match2 = re.search(flexible_pattern, text, re.IGNORECASE)
-    if match2:
-        print(f"💡 Sugerencia encontrada: '{match2.group(1).strip()}'")
+    # We test regex fallback explicitly first to ensure the logic works
+    # even if Gemini is not available or fails.
+    print("Testing Regex Fallback...")
+    result = parse_with_regex(text)
+    
+    all_passed = True
+    for key, expected_value in expected_checks.items():
+        if key == "items":
+            # Check if at least one item matches criteria
+            if not result["items"]:
+                print(f"❌ Items: Expected items but got empty list")
+                all_passed = False
+                continue
+                
+            item = result["items"][0]
+            for item_key, item_val in expected_value.items():
+                if item.get(item_key) != item_val:
+                    print(f"❌ Item {item_key}: Expected {item_val}, got {item.get(item_key)}")
+                    all_passed = False
+                else:
+                    print(f"✅ Item {item_key}: {item_val}")
+        else:
+            if result.get(key) != expected_value:
+                print(f"❌ {key}: Expected '{expected_value}', got '{result.get(key)}'")
+                all_passed = False
+            else:
+                print(f"✅ {key}: {expected_value}")
+    
+    if all_passed:
+        print("🎉 TEST PASSED (Regex)")
+    else:
+        print("💥 TEST FAILED (Regex)")
 
-# 2. Test Email Regex
-print("\n--- Test Email ---")
-email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
-match = re.search(email_pattern, text)
-if match:
-    print(f"✅ Email encontrado: '{match.group(0)}'")
-else:
-    print("❌ Email NO encontrado")
+# Case 1: The reported failing case
+text1 = "creame una factura con nombre anderson RUC 20212223241, diracción fiscal de avenida arica 1234 con correo ejemplo@hotmail.com para 10 routers d ecisco valorizados en 5000 cada uno"
+checks1 = {
+    "client": "anderson",
+    "ruc": "20212223241",
+    "address": "avenida arica 1234",
+    "email": "ejemplo@hotmail.com",
+    "items": {
+        "quantity": 10,
+        "unit_price": 5000.0
+    }
+}
 
-# 3. Test Client Regex
-print("\n--- Test Cliente ---")
-client_patterns = [
-    r'(?:para\s+el\s+cliente|para\s+cliente)\s+([A-Za-z0-9\s]+?)(?=\s+con\s+ruc|\s+por|\s+con\s+dirección|\s+$)',
-    r'cliente\s+([A-Za-z0-9\s]+?)(?=\s+con\s+ruc|\s+por|\s+con\s+dirección|\s+$)',
-    r'(?:nombre\s+social|con\s+el\s+nombre|nombre)\s+([A-Za-z0-9\s]+?)(?=\s*,|\s+direccion|\s+ruc|\s+por|\s+$)',
-    r'para\s+([A-Za-z0-9\s]+?)\s+de', # Patrón que añadí antes
-    r'(?:para|a)\s+([A-Za-z0-9\s]+?)(?=\s+con\s+ruc|\s+por|\s+con\s+dirección|\s+$)'
-]
+# Case 2: Standard case
+text2 = "factura para Juan Perez con RUC 10123456789 direccion en Calle Lima 123 y correo juan@test.com por 5 laptops a 2000 soles cada uno"
+checks2 = {
+    "client": "Juan Perez",
+    "ruc": "10123456789",
+    "address": "Calle Lima 123",
+    "email": "juan@test.com",
+    "items": {
+        "quantity": 5,
+        "unit_price": 2000.0
+    }
+}
 
-found = False
-for i, pat in enumerate(client_patterns):
-    m = re.search(pat, text, re.IGNORECASE)
-    if m:
-        print(f"✅ Cliente encontrado con patrón {i}: '{m.group(1).strip()}'")
-        found = True
-        break
-if not found:
-    print("❌ Cliente NO encontrado")
+if __name__ == "__main__":
+    run_test("Reported Issue", text1, checks1)
+    run_test("Standard Case", text2, checks2)

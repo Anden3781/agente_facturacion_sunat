@@ -83,6 +83,9 @@ def generate_full_invoice(request: InvoiceRequest):
             "ruc": parsed_data['ruc'],
             "address": parsed_data.get('address', ''),
             "email": parsed_data.get('email', ''),
+            "currency": parsed_data.get('currency', 'PEN'),
+            "payment_method": parsed_data.get('payment_method', 'Contado'),
+            "notes": parsed_data.get('notes', ''),
             "items": parsed_data['items'],
             "igv_rate": request.igv_rate,
             **totals
