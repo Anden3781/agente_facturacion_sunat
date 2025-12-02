@@ -6,4 +6,6 @@ openai
 python-telegram-bot
 reportlab
 python-dotenv
+google-generativeai
+
 

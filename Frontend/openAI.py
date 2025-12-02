@@ -308,7 +308,11 @@ def render_natural_language_panel() -> None:
                         st.session_state.invoice["customer"]["name"] = data.get("client", "Cliente General")
                         st.session_state.invoice["customer"]["tax_id"] = data.get("ruc", "00000000000")
                         st.session_state.invoice["customer"]["address"] = data.get("address", "")
+                        st.session_state.invoice["customer"]["email"] = data.get("email", "")
                         st.session_state.invoice["items"] = data.get("items", [])
+                        
+                        # Debug: Mostrar lo que llegó
+                        st.toast(f"Datos recibidos: {data}", icon="🐛")
                         
                         
                         st.success("✅ Factura generada exitosamente!")
